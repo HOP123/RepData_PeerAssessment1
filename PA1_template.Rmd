@@ -1,20 +1,79 @@
-# Reproducible Research: Peer Assessment 1
+Title
+========================================================
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **Help** toolbar button for more details on using R Markdown).
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+read file and save to myData
+
+```{r}
+myData <- read.csv(file="activity.csv", sep=",",header=T)
+usethis <- myData
+
+```
+change interval format
+
+'''{r}
+usethismin <- as.numeric(sprintf("%04.0f",usethis[,3]))
+usethismin <- sprintf("%02.0f:%02.0f",usethismin%/%100,usethismin%%100) #, usethismin[,3]/100%%10000)
+'''
+cbind dateTime and convert it to Time
+
+'''{r}
+usethis <-  cbind(usethis, usethismin)
+dateTime <- as.character(paste(as.character(usethis[,2]), usethis[,4], sep=" "))
+dateTime <- strptime(dateTime, "%d/%m/%Y %H:%M:%S")
+usethis <-  cbind(usethis, dateTime)
+'''
+subset weekday and weekend
+
+'''{r}
+weekday <- weekdays(as.Date(usethis[,5]))
+we<-subset(usethis, usethis[,6]=="Saturday"|usethis[,6]=="Sunday")
+wd <-subset(usethis, usethis[,6]!="Saturday"&usethis[,6]!="Sunday")
+'''
+show hist by days of the week(only complete cases)
+'''{r}
+library(lattice)
+usethis1 <- usethis[complete.cases(usethis),]
+histogram(~ steps | weekday, data=usethis1)
+
+usethis2 <-transform(usethis1, factor(usethis1$weekday))
+'''
+mean an dmedian by the seekdays
+'''{r}
+aggregate(steps~weekday, usethis1, mean)
+aggregate(steps~weekday, usethis1, median)
+'''
+find the max steps internal 
+'''{r}
+steps <- aggregate(steps~interval, usethis1, mean)
+max <- steps[which.max(steps$steps), ]
+max
+'''
+check with histogram
+'''{r}
+histogram(steps~interval, data=usethis1)
+'''
+number of NAs
+'''{r}
+sum(is.na(usethis))
+'''
+weekend hist of mean steps by interval
+'''{r}
+stepswe <- aggregate(steps~interval, we, mean)
+histogram(steps ~ interval, data=stepswe)
+'''
+weekdays hist of mean steps by interval
+'''{r}
+stepswd <- aggregate(steps~interval, wd, mean)
+histogram(steps ~ interval, data=stepswd)
+'''
 
 
-## Loading and preprocessing the data
 
 
 
-## What is mean total number of steps taken per day?
 
 
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
